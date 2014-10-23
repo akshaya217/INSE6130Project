@@ -12,14 +12,14 @@ public class FeatureExtractor {
 	     return sum;
 	}
 	
-	public void extract(float[] times, int[] sizes, ArrayList<String> features){
+	public void extract(float[] times, int[] directions, ArrayList<String> features){
 		
 		//transmission size features 
 		features.add(""+times.length); //how many lines read from the data file
 		
 		int c = 0;
-		for(int i=0; i<sizes.length; i++){
-			if (sizes[i]>0)
+		for(int i=0; i<directions.length; i++){
+			if (directions[i]>0)
 				c++;
 		}
 		
@@ -30,7 +30,7 @@ public class FeatureExtractor {
 		
 		//unique packet lengths
 		for(int i=-1500; i<1501; i++){
-			if (Arrays.asList(sizes).contains(i))
+			if (Arrays.asList(directions).contains(i))
 				features.add(""+1);
 			else
 				features.add(""+0);
@@ -38,8 +38,8 @@ public class FeatureExtractor {
 		
 		//Transposition (similar to good distance scheme)
 		c = 0;
-		for(int i=0; i<sizes.length; i++){
-			if(sizes[i] > 0){
+		for(int i=0; i<directions.length; i++){
+			if(directions[i] > 0){
 				c++;
 				features.add(""+i);//adding first 300 positive sizes
 			}
@@ -52,8 +52,8 @@ public class FeatureExtractor {
 		
 		c = 0;
 		int previousLocation = 0;
-		for(int i=0; i<sizes.length;i++){
-			if(sizes[i] > 0){
+		for(int i=0; i<directions.length;i++){
+			if(directions[i] > 0){
 				c++;
 				features.add(""+(i-previousLocation));//adding distance between each positive size and the previous positive size
 				previousLocation = i;
@@ -66,9 +66,9 @@ public class FeatureExtractor {
 		}
 		
 		//Packet distributions (where are the outgoing packets concentrated)
-		for(int i=0; i< Math.min(sizes.length, 3000); i++){
+		for(int i=0; i< Math.min(directions.length, 3000); i++){
 			if(i % 30 != 29){
-				if(sizes[i]>0)
+				if(directions[i]>0)
 					c++;
 			}else{
 				features.add(""+c);//add number of positive sizes in every 29 lines
@@ -76,7 +76,7 @@ public class FeatureExtractor {
 			}
 		}
 		
-		for(int i=sizes.length/30;i<100;i++){//if the groups of 30 are less than 100 (total < 3000) pad the rest with 0
+		for(int i=directions.length/30;i<100;i++){//if the groups of 30 are less than 100 (total < 3000) pad the rest with 0
 			features.add(""+0);
 		}
 		
@@ -84,13 +84,13 @@ public class FeatureExtractor {
 		ArrayList<Integer> bursts = new ArrayList<Integer>();
 		int currentBurst = 0;
 		int stopped = 0;
-		for(int i=0; i<sizes.length;i++){
-			if(sizes[i] < 0){//outgoing
+		for(int i=0; i<directions.length;i++){
+			if(directions[i] < 0){//outgoing
 				stopped = 0;
-				currentBurst -= sizes[i]; 
-			}else if(sizes[i] > 0 && stopped == 0){//first incoming
+				currentBurst -= directions[i]; 
+			}else if(directions[i] > 0 && stopped == 0){//first incoming
 				stopped = 1;
-			}else if(sizes[i] > 0 && stopped == 1){//second incoming
+			}else if(directions[i] > 0 && stopped == 1){//second incoming
 				stopped = 0;
 				bursts.add(currentBurst);
 			}
@@ -122,7 +122,7 @@ public class FeatureExtractor {
 		
 		for(int i=0; i<20; i++){//add first 20 sizes +1500
 			//if(bursts[i] != "X")
-			features.add(""+(sizes[i]+1500));
+			features.add(""+(directions[i]+1500));
 		}
 		
 	}//end of extract method
